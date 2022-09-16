@@ -3,6 +3,7 @@
 
 using System.Linq;
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -43,6 +44,7 @@ public class GenerateCube : MonoBehaviour
         {
             name = "Cube"
         };
+       
 
         // Define the vertex positions (same as workshop 2).
         mesh.SetVertices(new[]
@@ -161,12 +163,13 @@ public class GenerateCube : MonoBehaviour
         });
 
         // Task 1: Define the correct normals (as unit vectors; currently they're all "zero")
-        var topNormal = new Vector3(0.0f, 0.0f, 0.0f);
-        var bottomNormal = new Vector3(0.0f, 0.0f, 0.0f);
-        var leftNormal = new Vector3(0.0f, 0.0f, 0.0f);
-        var rightNormal = new Vector3(0.0f, 0.0f, 0.0f);
-        var frontNormal = new Vector3(0.0f, 0.0f, 0.0f);
-        var backNormal = new Vector3(0.0f, 0.0f, 0.0f);
+        List<Vector3> normals = calculateNormals(mesh);
+        var topNormal = normals[0];
+        var bottomNormal = normals[1];
+        var leftNormal = normals[2];
+        var rightNormal = normals[3];
+        var frontNormal = normals[4];
+        var backNormal = normals[5];
 
         mesh.SetNormals(new[]
         {
@@ -218,5 +221,25 @@ public class GenerateCube : MonoBehaviour
         mesh.SetIndices(indices, MeshTopology.Triangles, 0);
 
         return mesh;
+    }
+    private List<Vector3>calculateNormals(Mesh mesh)
+    {    
+        List<Vector3> normals = new List<Vector3>();
+        
+        for ( int i =0; i<mesh.vertices.Length; i += 6)
+        {
+            normals.Add(GetNormal(mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]));
+        }
+
+        return normals;        
+    }
+    private Vector3 GetNormal(Vector3 a, Vector3 b, Vector3 c)
+    {
+        // Find vectors corresponding to two of the sides of the triangle.
+        Vector3 side1 = b - a;
+        Vector3 side2 = c - a;
+
+        // Cross the vectors to get a perpendicular vector, then normalize it.
+        return Vector3.Cross(side1, side2).normalized;
     }
 }
